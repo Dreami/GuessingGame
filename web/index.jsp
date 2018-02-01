@@ -12,16 +12,22 @@
         <title>JSP Page</title>
     </head>
     <body>
-        <% String output = null;
-            if(request.getAttribute("correctGuess") == null) {
-            output = "Estoy pensando en un número...";
-        } else if(!((boolean) request.getAttribute("correctGuess")) &&
-                request.getAttribute("hl") != null) {
-            String hl = request.getAttribute("hl").toString();
-            output = "No es esa, intenta un numero más " + hl;
-        } else if((boolean) request.getAttribute("correctGuess")) {
-            output = "Es correcto! Ahora adivina el siguiente número.";
-        }
+        <% 
+        HttpSession s = request.getSession();    
+        String output = "Estoy pensando en un número...";
+        
+        Integer mysteryNumber = (Integer) s.getAttribute("mysteryNumber");
+            if(mysteryNumber != null) {
+                String hl = "";
+                int guess = (int) s.getAttribute("guess");
+                
+                if (guess < mysteryNumber)
+                    hl = "alto";
+                else if (guess > mysteryNumber)
+                    hl = "bajo";
+                
+                output = "No es esa, intenta un numero más " + hl;
+            }
         %>
         <h1><%=output%></h1>
         <div>

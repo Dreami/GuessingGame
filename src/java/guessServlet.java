@@ -12,6 +12,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  *
@@ -33,27 +34,36 @@ public class guessServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession();
         if(mysteryNumber == null || correctGuess) {
+            correctGuess = false;
             resetNumber();
+            session.setAttribute("mysteryNumber", mysteryNumber);
         }
-        
         int guess;
-        
         try {
             guess = Integer.parseInt(request.getParameter("guess"));
             if(guess != mysteryNumber) {
-                correctGuess = false;
-                request.setAttribute("correctGuess", correctGuess);
-                if(guess < mysteryNumber) {
-                    request.setAttribute("hl", "alto");
-                } else if (guess > mysteryNumber) {
-                    request.setAttribute("hl", "bajo");
-                }
+                session.setAttribute("guess", guess);
+                response.sendRedirect("index.jsp");
+                
             } else {
                 correctGuess = true;
-                request.setAttribute("correctGuess", correctGuess);
+                session.invalidate();
+                try (PrintWriter out = response.getWriter()) {
+                    out.println("<!DOCTYPE html>");
+                    out.println("<html>");
+                    out.println("<head>");
+                    out.println("<title>Servlet rpsServlet</title>");            
+                    out.println("</head>");
+                    out.println("<body>");
+                    out.println("<h1>Felicidades, adivinaste el numero.</h1>");
+                    out.println("<img src=\"are-you-wizard.jpg\" alt=\"r-u-a-wizurd\"/></br/>");
+                    out.println("<a href='index.jsp'>Regresar al juego</a>");
+                    out.println("</body>");
+                    out.println("</html>");
+                }
             }
-            request.getRequestDispatcher("index.jsp").forward(request, response);
         } catch (Exception e) {
             try (PrintWriter out = response.getWriter()) {
             out.println("<!DOCTYPE html>");
